@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>❌ Cancelar Reserva</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #ff758c, #ff7eb3);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .volver {
+      align-self: flex-start;
+      padding: 20px;
+    }
+
+    .volver a {
+      text-decoration: none;
+      background-color: #2c3e50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    h1 {
+      margin-top: 10px;
+      color: white;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1::before {
+      content: "❌";
+      font-size: 1.4em;
+    }
+
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 400px;
+      margin-top: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #e74c3c;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #c0392b;
+    }
+
+    #mensaje {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+      padding: 12px;
+      border-radius: 6px;
+      max-width: 500px;
+    }
+
+    .exito {
+      background-color: #2ecc71;
+      color: white;
+    }
+
+    .error {
+      background-color: #c0392b;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="volver">
+    <a href="index.html">← Volver al Inicio</a>
+  </div>
+
+  <h1>Cancelar Reserva</h1>
+
+  <form id="form-cancelacion">
+    <label for="reserva_id">ID de la Reserva:</label>
+    <input type="number" id="reserva_id" required />
+    <button type="submit">Cancelar</button>
+  </form>
+
+  <div id="mensaje"></div>
+
+  <script>
+    const form = document.getElementById("form-cancelacion");
+    const mensajeDiv = document.getElementById("mensaje");
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const reserva_id = parseInt(document.getElementById("reserva_id").value);
+
+      try {
+        const response = await fetch("http://localhost:8000/cancelacion", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reserva_id })
+        });
+
+        const resultado = await response.json();
+        mensajeDiv.textContent = resultado.mensaje || resultado.error;
+
+        if (resultado.mensaje && resultado.mensaje.includes("✅")) {
+          mensajeDiv.className = "exito";
+          form.reset();
+        } else {
+          mensajeDiv.className = "error";
+        }
+
+      } catch (error) {
+        console.error("❌ Error en la conexión:", error);
+        mensajeDiv.textContent = "❌ Error en la conexión al servidor.";
+        mensajeDiv.className = "error";
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title> Reserva de Asientos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      margin: 0;
+      padding: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h1::before {
+      content: "💺";
+      font-size: 1.5em;
+    }
+
+    form {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      width: 90%;
+      max-width: 500px;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    input[readonly] {
+      background-color: #f0f0f0;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    table {
+      background: white;
+      border-collapse: collapse;
+      margin: 20px auto;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 95%;
+      max-width: 800px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    #mensaje {
+      margin-top: 20px;
+      font-weight: bold;
+      text-align: center;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="width: 100%; max-width: 800px; margin-bottom: 10px; padding-left: 30px;">
+    <a href="index.html" style="text-decoration: none; background-color: #2c3e50; color: white; padding: 10px 20px; border-radius: 8px;">← Volver al Inicio</a>
+  </div>
+
+  <h1>Reserva de Asientos</h1>
+
+  <form id="form-reserva">
+    <label for="cliente_id">Seleccionar Cliente:</label>
+    <select id="cliente_id" required></select>
+
+    <label for="tarjeta_id">ID Tarjeta:</label>
+    <input type="text" id="tarjeta_id" readonly>
+
+    <label for="vuelo_id">ID Vuelo:</label>
+    <input type="number" id="vuelo_id" required>
+
+    <label for="total_asientos">Total Asientos:</label>
+    <input type="number" id="total_asientos" required>
+
+    <label for="total_cobro">Total a Cobrar:</label>
+    <input type="number" step="0.01" id="total_cobro" required>
+
+    <button type="submit">Reservar</button>
+  </form>
+
+  <div id="mensaje"></div>
+
+  <h2 style="color: #2c3e50;"> Vuelos Disponibles</h2>
+  <table id="tabla-vuelos">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Descripción</th>
+        <th>Fecha</th>
+        <th>Disponibles</th>
+        <th>Seleccionar</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Cargar clientes
+    fetch('http://localhost:8000/clientes')
+      .then(response => response.json())
+      .then(clientes => {
+        const select = document.getElementById('cliente_id');
+        clientes.forEach(cliente => {
+          const option = document.createElement('option');
+          option.value = cliente.id;
+          option.textContent = `${cliente.id} - ${cliente.nombre}`;
+          select.appendChild(option);
+        });
+      });
+
+    // Función para cargar vuelos
+    function cargarVuelos() {
+      fetch('http://localhost:8000/vuelos')
+        .then(response => response.json())
+        .then(vuelos => {
+          const tbody = document.querySelector('#tabla-vuelos tbody');
+          tbody.innerHTML = '';
+          vuelos.forEach(vuelo => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${vuelo.id}</td>
+              <td>${vuelo.descripcion}</td>
+              <td>${vuelo.fecha}</td>
+              <td>${vuelo.disponibles}</td>
+              <td><button onclick="seleccionarVuelo(${vuelo.id})">Usar</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+
+    // Inicializar carga de vuelos
+    cargarVuelos();
+
+    function seleccionarVuelo(id) {
+      document.getElementById('vuelo_id').value = id;
+    }
+
+    // Cargar automáticamente tarjeta al seleccionar cliente
+    document.getElementById('cliente_id').addEventListener('change', async function () {
+      const cliente_id = this.value;
+      try {
+        const response = await fetch(`http://localhost:8000/tarjeta?cliente_id=${cliente_id}`);
+        const result = await response.json();
+
+        if (result.tarjeta_id) {
+          document.getElementById('tarjeta_id').value = result.tarjeta_id;
+        } else {
+          document.getElementById('tarjeta_id').value = '';
+          alert("⚠️ Cliente no tiene tarjeta registrada.");
+        }
+      } catch (error) {
+        console.error("Error al obtener tarjeta:", error);
+      }
+    });
+
+    // Enviar reserva
+    const form = document.getElementById('form-reserva');
+    form.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      const datos = {
+        cliente_id: parseInt(document.getElementById('cliente_id').value),
+        tarjeta_id: document.getElementById('tarjeta_id').value,
+        vuelo_id: parseInt(document.getElementById('vuelo_id').value),
+        total_asientos: parseInt(document.getElementById('total_asientos').value),
+        total_cobro: parseFloat(document.getElementById('total_cobro').value)
+      };
+
+      try {
+        const response = await fetch('http://localhost:8000/reserva', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(datos)
+        });
+
+        const resultado = await response.json();
+        document.getElementById('mensaje').textContent = resultado.mensaje || resultado.error;
+
+        // ✅ Limpiar formulario si fue exitoso
+        if (resultado.mensaje && resultado.mensaje.includes('✅')) {
+          form.reset();
+          document.getElementById('cliente_id').value = '';
+document.getElementById('tarjeta_id').value = '';
+document.getElementById('vuelo_id').value = '';
+document.getElementById('total_asientos').value = '';
+document.getElementById('total_cobro').value = '';
+document.getElementById('cliente_id').focus();
+
+          cargarVuelos(); // Recargar vuelos actualizados
+        }
+
+      } catch (error) {
+        console.error('Error al conectar:', error);
+        document.getElementById('mensaje').textContent = '❌ Error en la conexión';
+      }
+    });
+  </script>
+
+</body>
+</html>
+
