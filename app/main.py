@@ -7,6 +7,8 @@ from app.crud import cancelacion
 from app.crud import vuelos
 from app.crud import tarjetas
 from app.crud import clientes
+from app.crud import metricas
+
 
 app = FastAPI()
 app.include_router(reserva.router)
@@ -15,7 +17,7 @@ app.include_router(clientes.router)
 app.include_router(vuelos.router)
 app.include_router(tarjetas.router)
 app.include_router(cancelacion.router)
-
+app.include_router(metricas.router)
 # Middleware CORS
 app.add_middleware(
     CORSMiddleware,

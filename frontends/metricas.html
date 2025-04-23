@@ -1,0 +1,156 @@
+<!-- metricas.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>📊 Métricas del Sistema</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #bdc3c7, #2c3e50);
+      margin: 0;
+      padding: 40px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #fff;
+      margin-bottom: 30px;
+    }
+
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 40px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #2c3e50;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    a {
+      text-decoration: none;
+      display: inline-block;
+      margin-bottom: 30px;
+      background-color: #2c3e50;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html">← Volver al Inicio</a>
+  <h1>📊 Métricas del Sistema</h1>
+
+  <div class="section">
+    <h2>✈️ Vuelos Disponibles</h2>
+    <table id="tabla-vuelos">
+      <thead>
+        <tr><th>ID</th><th>Descripción</th><th>Fecha</th><th>Disponibles</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>📑 Reservas Realizadas</h2>
+    <table id="tabla-reservas">
+      <thead>
+        <tr><th>ID Reserva</th><th>Cliente</th><th>Total</th><th>Estado</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>👤 Pasajeros Registrados</h2>
+    <table id="tabla-pasajeros">
+      <thead>
+        <tr><th>Nombre</th><th>DPI</th><th>Edad</th><th>Procedencia</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🧳 Pasajeros por Vuelo</h2>
+    <table id="tabla-pasajeros-vuelo">
+      <thead>
+        <tr><th>Pasajero</th><th>Vuelo</th><th>Asiento</th><th>Costo</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🛬 Escalas por Vuelo</h2>
+    <table id="tabla-escalas">
+      <thead>
+        <tr><th>Vuelo ID</th><th>Descripción Vuelo</th><th>País Escala</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    fetch('/vuelos').then(res => res.json()).then(data => {
+      const tbody = document.querySelector('#tabla-vuelos tbody');
+      data.forEach(v => {
+        tbody.innerHTML += `<tr><td>${v.id}</td><td>${v.descripcion}</td><td>${v.fecha}</td><td>${v.disponibles}</td></tr>`;
+      });
+    });
+
+    fetch('/reservas_activas').then(res => res.json()).then(data => {
+      const tbody = document.querySelector('#tabla-reservas tbody');
+      data.forEach(r => {
+        tbody.innerHTML += `<tr><td>${r.idreserva}</td><td>${r.cliente}</td><td>${r.total}</td><td>Activa</td></tr>`;
+      });
+    });
+
+    fetch('/pasajeros').then(res => res.json()).then(data => {
+      const tbody = document.querySelector('#tabla-pasajeros tbody');
+      data.forEach(p => {
+        tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.dpi}</td><td>${p.edad}</td><td>${p.procedencia}</td></tr>`;
+      });
+    });
+
+    fetch('/pasajeros_por_vuelo').then(res => res.json()).then(data => {
+      const tbody = document.querySelector('#tabla-pasajeros-vuelo tbody');
+      data.forEach(pv => {
+        tbody.innerHTML += `<tr><td>${pv.pasajero}</td><td>${pv.vuelo}</td><td>${pv.asiento}</td><td>${pv.costo}</td></tr>`;
+      });
+    });
+
+    fetch('/escalas').then(res => res.json()).then(data => {
+      const tbody = document.querySelector('#tabla-escalas tbody');
+      data.forEach(e => {
+        tbody.innerHTML += `<tr><td>${e.vuelo_id}</td><td>${e.descripcion}</td><td>${e.pais_escala}</td></tr>`;
+      });
+    });
+  </script>
+</body>
+</html>
